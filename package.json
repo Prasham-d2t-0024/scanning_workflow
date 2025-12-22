@@ -1,0 +1,38 @@
+{
+  "name": "ts-api-full-swagger-auth",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node dist/main.js",
+    "start:dev": "nest start --watch",
+    "start:prod": "node dist/main.js",
+    "build": "nest build"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.1.9",
+    "@nestjs/core": "^11.1.9",
+    "@nestjs/platform-express": "^11.1.9",
+    "@nestjs/swagger": "^11.2.3",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "axios": "^1.6.0",
+    "bcrypt": "^6.0.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.3",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
+    "pg": "^8.10.0",
+    "pg-hstore": "^2.3.4",    
+    "sequelize": "^6.35.1",
+    "winston": "^3.10.0"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.0",
+    "@types/bcrypt": "^6.0.0",
+    "@types/express": "^4.17.17",
+    "@types/jsonwebtoken": "^9.0.2",
+    "@types/node": "^20.0.0",
+    "@types/winston": "^2.4.4",
+    "typescript": "^5.2.2"
+  }
+}
