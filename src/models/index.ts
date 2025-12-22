@@ -5,6 +5,10 @@ import UserRole from './user_role.model';
 import ComponentType from './componenttype.model';
 import MetadataRegistry from './metadata_registry.model';
 
+import MenuGroup from './menu_group.model';
+import Menu from './menu.model';
+import RoleMenu from './role_menu.model';
+
 /**
  * =========================
  * User & Role Associations
@@ -51,6 +55,48 @@ MetadataRegistry.belongsTo(ComponentType, {
   as: 'componentType',
 });
 
+/**
+ * =========================
+ * MenuGroup & Menu
+ * =========================
+ */
+
+MenuGroup.hasMany(Menu, {
+  foreignKey: 'menu_group_id',
+  as: 'menus',
+});
+
+Menu.belongsTo(MenuGroup, {
+  foreignKey: 'menu_group_id',
+  as: 'menuGroup',
+});
+
+/**
+ * =========================
+ * Role & Menu (RBAC)
+ * =========================
+ */
+
+Role.belongsToMany(Menu, {
+  through: RoleMenu,
+  foreignKey: 'role_id',
+  otherKey: 'menu_id',
+  as: 'menus',
+});
+
+Menu.belongsToMany(Role, {
+  through: RoleMenu,
+  foreignKey: 'menu_id',
+  otherKey: 'role_id',
+  as: 'roles',
+});
+
+/**
+ * =========================
+ * Exports
+ * =========================
+ */
+
 export {
   User,
   Role,
@@ -58,4 +104,7 @@ export {
   UserRole,
   ComponentType,
   MetadataRegistry,
+  MenuGroup,
+  Menu,
+  RoleMenu,
 };
