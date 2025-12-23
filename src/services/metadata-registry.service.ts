@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import MetadataRegistry from '../models/metadata_registry.model';
 import ComponentType from '../models/componenttype.model';
 import {
@@ -13,14 +13,31 @@ export default class MetadataRegistryService {
    */
   async create(data: MetadataRegistryCreateDto) {
     // ✅ validate component type reference
-    const componentType = await ComponentType.findByPk(
-      data.componenttype_id,
-    );
+    // const componentType = await ComponentType.findByPk(
+    //   data.componenttype_id,
+    // );
 
-    if (!componentType) {
-      throw new NotFoundException(
-        `ComponentType with ID ${data.componenttype_id} not found`,
+    // if (!componentType) {
+    //   throw new NotFoundException(
+    //     `ComponentType with ID ${data.componenttype_id} not found`,
+    //   );
+    // }
+
+    const existingComponentType = await MetadataRegistry.findOne({
+      where: { key: data.key },
+    });
+
+    if (existingComponentType) {
+      const allComponentTypes = await MetadataRegistry.findAll();
+      const duplicateExists = allComponentTypes.some(
+        (ct) => ct.key.toLowerCase() === data.key.toLowerCase()
       );
+
+      if (duplicateExists) {
+        throw new BadRequestException(
+          `Metadata Registry with name '${data.key}' already exists`
+        );
+      }
     }
 
     return MetadataRegistry.create({

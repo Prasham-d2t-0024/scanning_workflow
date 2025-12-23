@@ -25,7 +25,7 @@ export default class ComponentTypeService {
 
       if (duplicateExists) {
         throw new BadRequestException(
-          `ComponentType with name '${data.name}' already exists`
+          `Component Type with name '${data.name}' already exists`
         );
       }
     }
