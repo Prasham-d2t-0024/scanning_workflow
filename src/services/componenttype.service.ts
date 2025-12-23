@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import ComponentType from '../models/componenttype.model';
 import { ComponentTypeCreateDto } from '../dto/componenttype.dto';
 
@@ -12,6 +12,24 @@ export default class ComponentTypeService {
    * Create Component Type
    */
   async create(data: ComponentTypeCreateDto) {
+    // Check for duplicate name (case-insensitive)
+    const existingComponentType = await ComponentType.findOne({
+      where: { name: data.name },
+    });
+
+    if (existingComponentType) {
+      const allComponentTypes = await ComponentType.findAll();
+      const duplicateExists = allComponentTypes.some(
+        (ct) => ct.name.toLowerCase() === data.name.toLowerCase()
+      );
+
+      if (duplicateExists) {
+        throw new BadRequestException(
+          `ComponentType with name '${data.name}' already exists`
+        );
+      }
+    }
+
     const componentType = await ComponentType.create({
       name: data.name,
       status: data.status ?? 'active',

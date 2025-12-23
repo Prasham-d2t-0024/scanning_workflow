@@ -7,12 +7,19 @@ import { AppModule } from './app.module';
 import connection from './config/dbconnection';
 import { requestLogger } from './middleware/requestLogger';
 import "./models";
+import * as cors from 'cors';
+const cors = require('cors');
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Middleware
   app.use(requestLogger);
 
+  //CORS
+  app.use(cors({
+    origin: '*'
+  }));
   // Validation
   app.useGlobalPipes(
     new ValidationPipe({
