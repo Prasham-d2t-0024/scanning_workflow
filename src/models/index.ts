@@ -4,6 +4,7 @@ import UserType from './usertype.model';
 import UserRole from './user_role.model';
 import ComponentType from './componenttype.model';
 import MetadataRegistry from './metadata_registry.model';
+import DigitizationCenter from './digitization-center.model';
 
 import MenuGroup from './menu_group.model';
 import Menu from './menu.model';
@@ -90,6 +91,15 @@ Menu.belongsToMany(Role, {
   otherKey: 'role_id',
   as: 'roles',
 });
+DigitizationCenter.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user',
+});
+
+User.hasMany(DigitizationCenter, {
+  foreignKey: 'user_id',
+  as: 'digitizationCenters',
+});
 
 /**
  * =========================
@@ -107,4 +117,5 @@ export {
   MenuGroup,
   Menu,
   RoleMenu,
+  DigitizationCenter,
 };
