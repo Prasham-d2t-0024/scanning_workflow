@@ -13,7 +13,7 @@ export default class RoleService {
     });
     if (existingRole) {
       throw new ConflictException(
-        `Role with name "${data.name}" already exists`,
+        `Role with name '${data.name}' already exists`,
       );
     }
     const role = await Role.create({

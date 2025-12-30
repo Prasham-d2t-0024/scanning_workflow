@@ -15,7 +15,7 @@ const sequelizeConnection = new Sequelize(dbName, dbUsername, dbPassword, {
   host: dbHost,
   port,
   dialect: dbDialect,
-  logging: false,
+  logging: true,
 });
 ;
 sequelizeConnection

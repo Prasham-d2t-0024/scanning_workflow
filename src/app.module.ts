@@ -21,6 +21,8 @@ import UserRoleService from './services/user-role.service';
 import MenuService from './services/menu.service'; // ✅ added
 import UserService from './services/user.service';
 import { UserController } from './controllers/user.controller';
+import { MenuGroupController } from './controllers/menu-group.controller';
+import MenuGroupService from './services/menu-group.service';
 
 @Module({
   controllers: [
@@ -33,7 +35,8 @@ import { UserController } from './controllers/user.controller';
     ItemController,
     RoleController,
     UserRoleController,
-    MenuController, // ✅ added
+    MenuController,
+    MenuGroupController
   ],
   providers: [
     AuthService,
@@ -45,7 +48,8 @@ import { UserController } from './controllers/user.controller';
     ItemService,
     RoleService,
     UserRoleService,
-    MenuService, // ✅ added
+    MenuService,
+    MenuGroupService
   ],
 })
 export class AppModule {}
