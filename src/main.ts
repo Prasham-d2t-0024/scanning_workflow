@@ -9,6 +9,7 @@ import { requestLogger } from './middleware/requestLogger';
 import "./models";
 import * as cors from 'cors';
 const cors = require('cors');
+import { GlobalHttpExceptionFilter } from './filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -28,7 +29,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
-
+app.useGlobalFilters(new GlobalHttpExceptionFilter());
   // Swagger
   const config = new DocumentBuilder()
     .setTitle('API')
