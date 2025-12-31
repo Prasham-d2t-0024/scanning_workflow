@@ -13,6 +13,7 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import RoleMenuService from '../services/role-menu.service';
 import {
   CreateRoleMenuDto,
+  RoleMenuCreateDto,
   UpdateRoleMenuDto,
 } from '../dto/role-menu.dto';
 
@@ -29,7 +30,7 @@ export class RoleMenuController {
     status: 201,
     description: 'Menu assigned to role successfully',
   })
-  create(@Body() body: CreateRoleMenuDto) {
+  create(@Body() body: RoleMenuCreateDto) {
     return this.roleMenuService.create(body);
   }
 
@@ -42,6 +43,15 @@ export class RoleMenuController {
   list() {
     return this.roleMenuService.findAll();
   }
+  @Get(':menuId')
+  @ApiOperation({ summary: 'Get all role-menu mappings' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of role-menu mappings',
+  })
+  listById(@Param('menuId', ParseIntPipe) menuId: number) {
+    return this.roleMenuService.findByMenuId(menuId);
+  }
 
   @Put(':roleMenuId')
   @ApiOperation({ summary: 'Update role-menu mapping by ID' })
@@ -49,6 +59,7 @@ export class RoleMenuController {
     status: 200,
     description: 'Role-menu mapping updated successfully',
   })
+
   update(
     @Param('roleMenuId', ParseIntPipe) roleMenuId: number,
     @Body() body: UpdateRoleMenuDto,

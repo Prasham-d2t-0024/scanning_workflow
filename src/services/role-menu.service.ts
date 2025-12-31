@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import RoleMenu from '../models/role_menu.model';
 import Role from '../models/role.model';
 import Menu from '../models/menu.model';
 import {
   CreateRoleMenuDto,
+  RoleMenuCreateDto,
   UpdateRoleMenuDto,
 } from '../dto/role-menu.dto';
 
@@ -12,27 +13,39 @@ export default class RoleMenuService {
   /**
    * Assign menu to role
    */
-  async create(data: CreateRoleMenuDto) {
-    // ✅ validate role exists
-    const role = await Role.findByPk(data.role_id);
-    if (!role) {
-      throw new NotFoundException(
-        `Role with ID ${data.role_id} not found`,
-      );
-    }
+  async create(data: RoleMenuCreateDto) {
+    const t = await RoleMenu.sequelize.transaction();
 
-    // ✅ validate menu exists
-    const menu = await Menu.findByPk(data.menu_id);
-    if (!menu) {
-      throw new NotFoundException(
-        `Menu with ID ${data.menu_id} not found`,
+    try {
+      const menu = await Menu.create(
+        {
+          menu_group_id: data.menu_group_id,
+          name: data.name,
+          path: data.path,
+          icon: data.icon,
+          status: data.status,
+        },
+        { transaction: t }
       );
-    }
 
-    return RoleMenu.create({
-      role_id: data.role_id,
-      menu_id: data.menu_id,
-    });
+      await RoleMenu.bulkCreate(
+        data.role_ids.map((roleId) => ({
+          role_id: Number(roleId),
+          menu_id: menu.menu_id,
+        })),
+        { transaction: t }
+      );
+
+      await t.commit();
+
+      return {
+        success: true,
+        menu: menu.get({ plain: true }),
+      };
+    } catch (error) {
+      await t.rollback();
+      throw error;
+    }
   }
 
   /**
@@ -75,19 +88,95 @@ export default class RoleMenuService {
     });
   }
 
+  findByMenuId(menu_id: number) {
+    return RoleMenu.findAll({
+      where: { menu_id },
+    });
+  }
+
   /**
    * Update role-menu mapping
    */
-  async update(id: number, data: UpdateRoleMenuDto) {
-    const roleMenu = await this.findById(id);
+  async update(menuId: number, data: UpdateRoleMenuDto) {
+    const t = await RoleMenu.sequelize.transaction();
 
-    await roleMenu.update({
-      role_id: data.role_id ?? roleMenu.role_id,
-      menu_id: data.menu_id ?? roleMenu.menu_id,
-    });
+    try {
+      // 1️⃣ Fetch menu
+      const menu = await Menu.findByPk(menuId, { transaction: t });
 
-    return roleMenu;
+      if (!menu) {
+        throw new Error('Menu not found');
+      }
+
+      // 2️⃣ Update menu fields
+      await menu.update(
+        {
+          menu_group_id: data.menu_group_id,
+          name: data.name,
+          path: data.path,
+          icon: data.icon,
+          status: data.status,
+        },
+        { transaction: t }
+      );
+
+      // 3️⃣ Get existing role-menu mappings for this menu
+      const existingMappings = await RoleMenu.findAll({
+        where: { menu_id: menuId },
+        transaction: t,
+      });
+
+      const existingRoleIds = existingMappings.map(m => m.role_id);
+      const incomingRoleIds = data.role_ids.map(Number);
+
+      // 4️⃣ Find roles to ADD
+      const rolesToAdd = incomingRoleIds.filter(
+        roleId => !existingRoleIds.includes(roleId)
+      );
+
+      // 5️⃣ Find roles to REMOVE
+      const rolesToRemove = existingRoleIds.filter(
+        roleId => !incomingRoleIds.includes(roleId)
+      );
+
+      // 6️⃣ Remove only necessary mappings
+      if (rolesToRemove.length > 0) {
+        await RoleMenu.destroy({
+          where: {
+            menu_id: menuId,
+            role_id: rolesToRemove,
+          },
+          transaction: t,
+        });
+      }
+
+      // 7️⃣ Add missing mappings
+      if (rolesToAdd.length > 0) {
+        await RoleMenu.bulkCreate(
+          rolesToAdd.map(roleId => ({
+            role_id: roleId,
+            menu_id: menuId,
+          })),
+          { transaction: t }
+        );
+      }
+
+      // 8️⃣ Commit
+      await t.commit();
+
+      return {
+        success: true,
+        menu: menu.get({ plain: true }),
+        roles: incomingRoleIds,
+      };
+    } catch (error) {
+      await t.rollback();
+      throw new InternalServerErrorException(
+        'Failed to update role-menu mapping'
+      );
+    }
   }
+
 
   /**
    * Delete role-menu mapping
