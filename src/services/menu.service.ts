@@ -25,7 +25,7 @@ export default class MenuService {
    */
   async findAll() {
     return Menu.findAll({
-      order: [['sort_order', 'ASC']],
+      order: [['order', 'ASC']],
     });
   }
 
