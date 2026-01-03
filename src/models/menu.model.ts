@@ -1,5 +1,6 @@
-import { DataTypes, Model, Optional } from 'sequelize';
+import { BelongsToManyAddAssociationMixin, BelongsToManyAddAssociationsMixin, BelongsToManyGetAssociationsMixin, BelongsToManySetAssociationsMixin, DataTypes, Model, Optional } from 'sequelize';
 import connection from '../config/dbconnection';
+import Role from './role.model';
 
 /**
  * Attributes
@@ -37,9 +38,14 @@ class Menu
   public icon?: string;
   public order?: number;
   public status!: 'active' | 'inactive';
-
+  public roleIds?: number[];
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  public addRole!: BelongsToManyAddAssociationMixin<Role, number>;
+  public addRoles!: BelongsToManyAddAssociationsMixin<Role, number>;
+  public setRoles!: BelongsToManySetAssociationsMixin<Role, number>;
+  public getRoles!: BelongsToManyGetAssociationsMixin<Role>;
 }
 
 /**

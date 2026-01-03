@@ -47,6 +47,8 @@ export class CreateMenuDto {
   @IsOptional()
   @IsEnum(['active', 'inactive'])
   status?: 'active' | 'inactive';
+
+  roleIds?: number[];
 }
 
 /**

@@ -4,6 +4,7 @@ import {
   CreateMenuDto,
   UpdateMenuDto,
 } from '../dto/menu.dto';
+import { Role } from 'src/models';
 
 @Injectable()
 export default class MenuService {
@@ -11,20 +12,39 @@ export default class MenuService {
    * Create Menu
    */
   async create(data: CreateMenuDto) {
-    return Menu.create({
+    const menu = await Menu.create({
       menu_group_id: data.menu_group_id,
       name: data.name,
       path: data.path,
-      icon: data.icon,      
+      icon: data.icon,
       status: data.status,
     });
-  }
 
+    // ✅ Assign roles if provided
+    if (data.roleIds && data.roleIds.length > 0) {
+      await menu.addRoles(data.roleIds); // <-- HERE
+    }
+
+    return menu;
+  }
+  async assignRoles(menuId: number, roleIds: number[]) {
+    const menu = await this.findById(menuId);
+
+    await menu.setRoles(roleIds); // replaces existing roles
+
+    return { success: true };
+  }
   /**
    * Get all menus
    */
   async findAll() {
     return Menu.findAll({
+      include: [
+        {
+          model: Role,
+          through: { attributes: [] },
+        },
+      ],
       order: [['order', 'ASC']],
     });
   }
