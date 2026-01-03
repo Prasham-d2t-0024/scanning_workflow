@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsInt,
   IsEnum,
+  IsArray,
 } from 'class-validator';
 
 /**
@@ -48,6 +49,9 @@ export class CreateMenuDto {
   @IsEnum(['active', 'inactive'])
   status?: 'active' | 'inactive';
 
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
   roleIds?: number[];
 }
 

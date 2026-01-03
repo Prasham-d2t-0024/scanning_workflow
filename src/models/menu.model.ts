@@ -38,7 +38,7 @@ class Menu
   public icon?: string;
   public order?: number;
   public status!: 'active' | 'inactive';
-  public roleIds?: number[];
+
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 

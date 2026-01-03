@@ -4,7 +4,7 @@ import {
   CreateMenuDto,
   UpdateMenuDto,
 } from '../dto/menu.dto';
-import { Role } from 'src/models';
+import { MenuGroup, Role } from 'src/models';
 
 @Injectable()
 export default class MenuService {
@@ -42,7 +42,12 @@ export default class MenuService {
       include: [
         {
           model: Role,
+          as: 'roles',
           through: { attributes: [] },
+        },
+        {
+          model: MenuGroup,
+          as: 'menuGroup',
         },
       ],
       order: [['order', 'ASC']],
@@ -53,8 +58,9 @@ export default class MenuService {
    * Get menu by ID
    */
   async findById(id: number) {
-    const menu = await Menu.findByPk(id);
-
+    const menu = await Menu.findByPk(id, {
+      include: [{ model: Role, as: 'roles' }],
+    });
     if (!menu) {
       throw new NotFoundException(`Menu with ID ${id} not found`);
     }
