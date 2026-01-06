@@ -36,8 +36,8 @@ export class CreateUserDto {
     example: 1,
     description: 'User type ID',
   })
-  @IsInt()
-  user_type_id!: number;
+  // @IsInt()
+  // user_type_id!: number;
 
   @ApiProperty({
     example: [1, 2],
@@ -47,6 +47,11 @@ export class CreateUserDto {
   @ArrayNotEmpty()
   @IsInt({ each: true })
   role_ids!: number[];
+
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsInt({ each: true })
+  menu_ids!: number[];
 }
 
 /**
@@ -77,9 +82,9 @@ export class UpdateUserDto {
   @ApiPropertyOptional({
     example: 2,
   })
-  @IsOptional()
-  @IsInt()
-  user_type_id?: number;
+  // @IsOptional()
+  // @IsInt()
+  // user_type_id?: number;
 
   @ApiPropertyOptional({
     example: [2, 3],
@@ -88,4 +93,9 @@ export class UpdateUserDto {
   @IsArray()
   @IsInt({ each: true })
   role_ids?: number[];
+
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsInt({ each: true })
+  menu_ids!: number[];
 }

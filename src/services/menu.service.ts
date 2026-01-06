@@ -20,9 +20,8 @@ export default class MenuService {
       status: data.status,
     });
 
-    // ✅ Assign roles if provided
     if (data.roleIds && data.roleIds.length > 0) {
-      await menu.addRoles(data.roleIds); // <-- HERE
+      await menu.addRoles(data.roleIds);
     }
 
     return menu;
@@ -59,7 +58,7 @@ export default class MenuService {
    */
   async findById(id: number) {
     const menu = await Menu.findByPk(id, {
-      include: [{ model: Role, as: 'roles' }],
+      include: [{ model: Role, as: 'roles' }, {model: MenuGroup,as: 'menuGroup',}],
     });
     if (!menu) {
       throw new NotFoundException(`Menu with ID ${id} not found`);
@@ -78,10 +77,13 @@ export default class MenuService {
       menu_group_id: data.menu_group_id ?? menu.menu_group_id,
       name: data.name ?? menu.name,
       path: data.path ?? menu.path,
-      icon: data.icon ?? menu.icon,     
+      icon: data.icon ?? menu.icon,
       status: data.status ?? menu.status,
     });
 
+    if (data.roleIds && data.roleIds.length > 0) {
+      await menu.setRoles(data.roleIds);
+    }
     return menu;
   }
 

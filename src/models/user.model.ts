@@ -1,6 +1,8 @@
-import { DataTypes, Model, Optional } from "sequelize";
+import { BelongsToManyAddAssociationMixin, BelongsToManyAddAssociationsMixin, BelongsToManyGetAssociationsMixin, BelongsToManySetAssociationsMixin, DataTypes, Model, Optional } from "sequelize";
 import connection from "../config/dbconnection";
 import UserType from "./usertype.model";
+import Role from "./role.model";
+import Menu from "./menu.model";
 
 /**
  * Attributes
@@ -10,7 +12,6 @@ export interface UserAttributes {
   full_name: string;
   username: string;
   password: string;
-  user_type_id: number;
 
   createdAt?: Date;
   updatedAt?: Date;
@@ -38,11 +39,19 @@ class User
   public full_name!: string;
   public username!: string;
   public password!: string;
-  public user_type_id!: number;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
   public readonly deletedAt!: Date;
+
+  public addRole!: BelongsToManyAddAssociationMixin<Role, number>;
+  public addRoles!: BelongsToManyAddAssociationsMixin<Role, number>;
+  public setRoles!: BelongsToManySetAssociationsMixin<Role, number>;
+  public getRoles!: BelongsToManyGetAssociationsMixin<Role>;
+  public addMenu!: BelongsToManyAddAssociationMixin<Menu, number>;
+  public addMenus!: BelongsToManyAddAssociationsMixin<Menu, number>;
+  public setMenus!: BelongsToManySetAssociationsMixin<Menu, number>;
+  public getMenus!: BelongsToManyGetAssociationsMixin<Menu>;
 }
 
 /**
@@ -71,16 +80,6 @@ User.init(
       type: DataTypes.STRING(255),
       allowNull: false,
     },
-
-    user_type_id: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      allowNull: false,
-      references: {
-        model: "user_type",
-        key: "user_type_id",
-      },
-    },
-
     createdAt: { type: DataTypes.DATE, allowNull: true },
     updatedAt: { type: DataTypes.DATE, allowNull: true },
     deletedAt: { type: DataTypes.DATE, allowNull: true },

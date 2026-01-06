@@ -94,4 +94,9 @@ export class UpdateMenuDto {
   @IsOptional()
   @IsEnum(['active', 'inactive'])
   status?: 'active' | 'inactive';
+
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  roleIds?: number[];
 }

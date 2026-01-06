@@ -9,6 +9,7 @@ import DigitizationCenter from './digitization-center.model';
 import MenuGroup from './menu_group.model';
 import Menu from './menu.model';
 import RoleMenu from './role_menu.model';
+import UserMenu from './user_menu.model';
 
 /**
  * =========================
@@ -16,15 +17,15 @@ import RoleMenu from './role_menu.model';
  * =========================
  */
 
-User.belongsTo(UserType, {
-  foreignKey: 'user_type_id',
-  as: 'userType',
-});
+// User.belongsTo(UserType, {
+//   foreignKey: 'user_type_id',
+//   as: 'userType',
+// });
 
-UserType.hasMany(User, {
-  foreignKey: 'user_type_id',
-  as: 'users',
-});
+// UserType.hasMany(User, {
+//   foreignKey: 'user_type_id',
+//   as: 'users',
+// });
 
 User.belongsToMany(Role, {
   through: UserRole,
@@ -67,6 +68,7 @@ MenuGroup.hasMany(Menu, {
   as: 'menus',
 });
 
+//This is saying that foreign key of Menu table is menu_group_id and this column is primary key of menuGroup table
 Menu.belongsTo(MenuGroup, {
   foreignKey: 'menu_group_id',
   as: 'menuGroup',
@@ -78,6 +80,9 @@ Menu.belongsTo(MenuGroup, {
  * =========================
  */
 
+//A Role is connected to many Users, but not directly — the connection happens through the UserRole table, where role_id refers to Role and user_id refers to User.
+
+//Role ──(role_id)──▶ UserRole ◀──(user_id)── User
 Role.belongsToMany(Menu, {
   through: RoleMenu,
   foreignKey: 'role_id',
@@ -103,6 +108,29 @@ User.hasMany(DigitizationCenter, {
 
 /**
  * =========================
+ * User & Menu Associations
+ * =========================
+ */
+
+  User.belongsToMany(Menu, {
+    through: UserMenu,
+    foreignKey: 'user_id',
+    otherKey: 'menu_id',
+    as: 'menus',
+  });
+
+  /**
+   * Menu → Users
+   */
+  Menu.belongsToMany(User, {
+    through: UserMenu,
+    foreignKey: 'menu_id',
+    otherKey: 'user_id',
+    as: 'users',
+  });
+
+/**
+ * =========================
  * Exports
  * =========================
  */
@@ -118,4 +146,5 @@ export {
   Menu,
   RoleMenu,
   DigitizationCenter,
+  UserMenu
 };

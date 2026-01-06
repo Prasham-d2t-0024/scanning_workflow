@@ -48,7 +48,7 @@ export default class DigitizationCenterService {
           full_name: data.manager_name,
           username: data.username,
           password: hashedPassword,
-          user_type_id: null,
+          // user_type_id: null,
         },
         { transaction },
       );

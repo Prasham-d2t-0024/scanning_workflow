@@ -27,6 +27,8 @@ import UserService from './services/user.service';
 import RoleMenuService from './services/role-menu.service';
 import ProcessService from './services/process.service'; 
 import MenuGroupService from './services/menu-group.service'; 
+import { UserMenuController } from './controllers/user-menu.controllar';
+import UserMenuService from './services/user-menu.service';
 
 @Module({
   controllers: [
@@ -43,6 +45,7 @@ import MenuGroupService from './services/menu-group.service';
     RoleMenuController,
     ProcessController, 
     MenuGroupController,
+    UserMenuController
   ],
   providers: [
     AuthService,
@@ -57,7 +60,8 @@ import MenuGroupService from './services/menu-group.service';
     MenuService,
     RoleMenuService,
     ProcessService,
-    MenuGroupService
+    MenuGroupService,
+    UserMenuService
   ],
 })
 export class AppModule {}
