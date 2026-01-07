@@ -28,20 +28,14 @@ export default class MetadataRegistryService {
     });
 
     if (existingComponentType) {
-      const allComponentTypes = await MetadataRegistry.findAll();
-      const duplicateExists = allComponentTypes.some(
-        (ct) => ct.key.toLowerCase() === data.key.toLowerCase()
+      throw new BadRequestException(
+        `Metadata Registry with name '${data.key}' already exists`
       );
-
-      if (duplicateExists) {
-        throw new BadRequestException(
-          `Metadata Registry with name '${data.key}' already exists`
-        );
-      }
     }
 
     return MetadataRegistry.create({
       key: data.key,
+      title: data.title,
       isrequired: data.isrequired,
       componenttype_id: data.componenttype_id,
       ismultiple: data.ismultiple,
@@ -111,6 +105,7 @@ export default class MetadataRegistryService {
 
     await record.update({
       key: data.key ?? record.key,
+      title: data.title ?? record.title,
       isrequired: data.isrequired ?? record.isrequired,
       componenttype_id:
         data.componenttype_id ?? record.componenttype_id,
@@ -129,4 +124,19 @@ export default class MetadataRegistryService {
 
     return { success: true, id };
   }
+
+  async findbyKey(key: string) {
+    const record = await MetadataRegistry.findOne({
+      where: { key },
+      include: [
+        {
+          model: ComponentType,
+          as: 'componentType',
+        },
+      ],
+    });
+
+    return record;
+  }
+
 }

@@ -11,12 +11,17 @@ import {
  */
 export class MetadataRegistryCreateDto {
   @ApiProperty({
-    example: 'label',
+    example: 'dc.title',
     description: 'Metadata key name',
   })
   @IsString()
   key: string;
-
+  @ApiProperty({
+    example: 'Author',
+    description: 'Metadata title',
+  })
+  @IsString()
+  title: string;
   @ApiProperty({
     example: true,
     description: 'Is this metadata required?',
@@ -44,12 +49,17 @@ export class MetadataRegistryCreateDto {
  */
 export class MetadataRegistryUpdateDto {
   @ApiPropertyOptional({
-    example: 'placeholder',
+    example: 'dc.title',
   })
   @IsOptional()
   @IsString()
   key?: string;
-
+  @ApiPropertyOptional({
+    example: 'Author',
+  })
+  @IsOptional()
+  @IsString()
+  title?: string;
   @ApiPropertyOptional({
     example: false,
   })

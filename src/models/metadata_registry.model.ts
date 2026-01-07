@@ -8,6 +8,7 @@ import ComponentType from './componenttype.model';
 export interface MetadataRegistryAttributes {
   metadata_registry_id?: number;
   key: string;
+  title: string;
   isrequired: boolean;
   componenttype_id: number;
   ismultiple: boolean;
@@ -32,6 +33,7 @@ class MetadataRegistry
 {
   public metadata_registry_id!: number;
   public key!: string;
+  public title!: string;
   public isrequired!: boolean;
   public componenttype_id!: number;
   public ismultiple!: boolean;
@@ -59,7 +61,10 @@ MetadataRegistry.init(
       type: DataTypes.STRING(255),
       allowNull: false,
     },
-
+    title: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
     isrequired: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
