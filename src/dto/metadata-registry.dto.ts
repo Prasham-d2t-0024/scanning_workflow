@@ -1,9 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsString,
   IsBoolean,
   IsOptional,
   IsInt,
+  Min,
+  IsArray,
+  ValidateNested,
 } from 'class-validator';
 
 /**
@@ -80,4 +84,21 @@ export class MetadataRegistryUpdateDto {
   @IsOptional()
   @IsBoolean()
   ismultiple?: boolean;
+}
+
+
+export class MetadataReorderItemDto {
+  @IsInt()
+  metadata_registry_id: number;
+
+  @IsInt()
+  @Min(0)
+  metadataOrder: number;
+}
+
+export class MetadataRegistryReorderDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => MetadataReorderItemDto)
+  items: MetadataReorderItemDto[];
 }

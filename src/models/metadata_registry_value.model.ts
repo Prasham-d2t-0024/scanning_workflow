@@ -7,7 +7,7 @@ import connection from '../config/dbconnection';
 export interface MetadataRegistryValueAttributes {
   metadata_registry_value_id?: number;
   metadata_registry_id: number;
-  value: string;
+  value: string | number;
 
   createdAt?: Date;
   updatedAt?: Date;
@@ -35,7 +35,7 @@ class MetadataRegistryValue
 {
   public metadata_registry_value_id!: number;
   public metadata_registry_id!: number;
-  public value!: string;
+  public value!: string | number;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -63,7 +63,7 @@ MetadataRegistryValue.init(
     },
 
     value: {
-      type: DataTypes.TEXT,
+      type: DataTypes.TEXT || DataTypes.NUMBER,
       allowNull: false,
     },
 

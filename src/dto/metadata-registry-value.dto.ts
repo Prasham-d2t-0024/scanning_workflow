@@ -1,23 +1,28 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsString, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsInt, IsString, IsOptional, IsArray, ValidateNested, ValidateIf, IsNumber } from 'class-validator';
 
 /**
  * Create MetadataRegistryValue DTO
  */
 export class MetadataRegistryValueCreateDto {
-  @ApiProperty({
-    example: 1,
-    description: 'Metadata Registry ID',
-  })
+  @ApiProperty({ example: 1 })
   @IsInt()
   metadata_registry_id: number;
 
   @ApiProperty({
     example: 'Button Label',
-    description: 'Value for the metadata key',
+    description: 'String or Number value',
+    oneOf: [
+      { type: 'string' },
+      { type: 'number' },
+    ],
   })
+  @ValidateIf(o => typeof o.value === 'string')
   @IsString()
-  value: string;
+  @ValidateIf(o => typeof o.value === 'number')
+  @IsNumber()
+  value: string | number;
 }
 
 /**
@@ -29,6 +34,16 @@ export class MetadataRegistryValueUpdateDto {
     description: 'Updated value for the metadata key',
   })
   @IsOptional()
-  @IsString()
-  value?: string;
+  value?: string | number;
+}
+
+export class MetadataRegistryValueBulkCreateDto {
+  @ApiProperty({
+    type: [MetadataRegistryValueCreateDto],
+    description: 'Array of metadata registry values',
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => MetadataRegistryValueCreateDto)
+  items: MetadataRegistryValueCreateDto[];
 }

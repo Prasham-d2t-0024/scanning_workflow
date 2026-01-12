@@ -12,6 +12,7 @@ export interface MetadataRegistryAttributes {
   isrequired: boolean;
   componenttype_id: number;
   ismultiple: boolean;
+  metadataOrder: number
 
   createdAt?: Date;
   updatedAt?: Date;
@@ -37,6 +38,7 @@ class MetadataRegistry
   public isrequired!: boolean;
   public componenttype_id!: number;
   public ismultiple!: boolean;
+  public metadataOrder!: number;
 
   // association (optional typing)
   public readonly componentType?: ComponentType;
@@ -86,6 +88,12 @@ MetadataRegistry.init(
       defaultValue: false,
     },
 
+    metadataOrder: {
+      field: 'metadata_order',
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+      defaultValue: 0,
+    },
     createdAt: { type: DataTypes.DATE },
     updatedAt: { type: DataTypes.DATE },
     deletedAt: { type: DataTypes.DATE },

@@ -10,6 +10,7 @@ import MenuGroup from './menu_group.model';
 import Menu from './menu.model';
 import RoleMenu from './role_menu.model';
 import UserMenu from './user_menu.model';
+import MetadataRegistryValue from './metadata_registry_value.model';
 
 /**
  * =========================
@@ -127,6 +128,21 @@ User.hasMany(DigitizationCenter, {
     foreignKey: 'menu_id',
     otherKey: 'user_id',
     as: 'users',
+  });
+
+/**
+ * =========================
+ * MetadataRegistry & MetadataRegistryValue Associations
+ * =========================
+ */
+  MetadataRegistry.hasMany(MetadataRegistryValue, {
+    foreignKey: 'metadata_registry_id',
+    as: 'metadataRegistry',
+  });
+
+   MetadataRegistryValue.belongsTo(MetadataRegistry, {
+    foreignKey: 'metadata_registry_value_id',
+    as: 'metadataRegistry',
   });
 
 /**

@@ -21,6 +21,7 @@ import {
 import MetadataRegistryService from '../services/metadata-registry.service';
 import {
   MetadataRegistryCreateDto,
+  MetadataRegistryReorderDto,
   MetadataRegistryUpdateDto,
 } from '../dto/metadata-registry.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -88,5 +89,10 @@ export class MetadataRegistryController {
   @ApiResponse({ status: 204 })
   async remove(@Param('id', ParseIntPipe) id: number) {
     await this.service.delete(id);
+  }
+
+  @Post('reorder')
+  async reorder(@Body() body: MetadataRegistryReorderDto) {
+    return this.service.metadataReorder(body.items);
   }
 }

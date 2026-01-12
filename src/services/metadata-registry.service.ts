@@ -12,35 +12,44 @@ export default class MetadataRegistryService {
    * Create Metadata Registry
    */
   async create(data: MetadataRegistryCreateDto) {
-    // ✅ validate component type reference
-    // const componentType = await ComponentType.findByPk(
-    //   data.componenttype_id,
-    // );
+    const t = await MetadataRegistry.sequelize.transaction();
 
-    // if (!componentType) {
-    //   throw new NotFoundException(
-    //     `ComponentType with ID ${data.componenttype_id} not found`,
-    //   );
-    // }
+    try {
+      const existing = await MetadataRegistry.findOne({
+        where: { key: data.key },
+        transaction: t,
+      });
 
-    const existingComponentType = await MetadataRegistry.findOne({
-      where: { key: data.key },
-    });
+      if (existing) {
+        throw new BadRequestException(
+          `Metadata Registry with name '${data.key}' already exists`
+        );
+      }
 
-    if (existingComponentType) {
-      throw new BadRequestException(
-        `Metadata Registry with name '${data.key}' already exists`
+      const maxOrder =
+      (await MetadataRegistry.max('metadataOrder', { transaction: t })) ?? 0;
+
+      const record = await MetadataRegistry.create(
+        {
+          key: data.key,
+          title: data.title,
+          isrequired: data.isrequired,
+          componenttype_id: data.componenttype_id,
+          ismultiple: data.ismultiple,
+          metadataOrder: Number(maxOrder) + 1,
+        },
+        { transaction: t }
       );
-    }
 
-    return MetadataRegistry.create({
-      key: data.key,
-      title: data.title,
-      isrequired: data.isrequired,
-      componenttype_id: data.componenttype_id,
-      ismultiple: data.ismultiple,
-    });
+      await t.commit();
+      return record;
+
+    } catch (error) {
+      await t.rollback();
+      throw error;
+    }
   }
+
 
   /**
    * Get all Metadata Registry entries
@@ -53,7 +62,9 @@ export default class MetadataRegistryService {
           as: 'componentType',
         },
       ],
-      order: [['createdAt', 'DESC']],
+      order: [['metadataOrder', 'ASC']],
+    }).catch((err)=>{
+      console.log(err);
     });
   }
 
@@ -108,7 +119,7 @@ export default class MetadataRegistryService {
       title: data.title ?? record.title,
       isrequired: data.isrequired ?? record.isrequired,
       componenttype_id:
-        data.componenttype_id ?? record.componenttype_id,
+      data.componenttype_id ?? record.componenttype_id,
       ismultiple: data.ismultiple ?? record.ismultiple,
     });
 
@@ -137,6 +148,31 @@ export default class MetadataRegistryService {
     });
 
     return record;
+  }
+  async metadataReorder(items: { metadata_registry_id: number; metadataOrder: number }[]) {
+    if (!items.length) {
+      throw new BadRequestException('Reorder list cannot be empty');
+    }
+
+    const transaction = await MetadataRegistry.sequelize.transaction();
+
+    try {
+      for (const item of items) {
+        await MetadataRegistry.update(
+          { metadataOrder: item.metadataOrder },
+          {
+            where: { metadata_registry_id: item.metadata_registry_id },
+            transaction,
+          }
+        );
+      }
+
+      await transaction.commit();
+      return { success: true };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 
 }

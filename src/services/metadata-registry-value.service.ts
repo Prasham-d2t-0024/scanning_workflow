@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import MetadataRegistryValue from '../models/metadata_registry_value.model';
 import MetadataRegistry from '../models/metadata_registry.model';
 import {
+  MetadataRegistryValueBulkCreateDto,
   MetadataRegistryValueCreateDto,
   MetadataRegistryValueUpdateDto,
 } from '../dto/metadata-registry-value.dto';
@@ -11,23 +12,44 @@ export default class MetadataRegistryValueService {
   /**
    * Create MetadataRegistryValue
    */
-  async create(data: MetadataRegistryValueCreateDto) {
-    // ✅ validate metadata registry exists
-    const metadataRegistry = await MetadataRegistry.findByPk(
-      data.metadata_registry_id,
+  async create(data: MetadataRegistryValueBulkCreateDto) {
+    const items = data.items;
+
+    if (!items.length) {
+      return [];
+    }
+
+    // 1️⃣ Collect unique metadata_registry_ids
+    const registryIds = [
+      ...new Set(items.map(i => i.metadata_registry_id)),
+    ];
+
+    // 2️⃣ Fetch all registries at once
+    const registries = await MetadataRegistry.findAll({
+      where: { metadata_registry_id: registryIds },
+      attributes: ['metadata_registry_id'],
+    });
+
+    // 3️⃣ Validate all IDs exist
+    const foundIds = new Set(
+      registries.map(r => r.metadata_registry_id),
     );
 
-    if (!metadataRegistry) {
+    const missing = registryIds.filter(id => !foundIds.has(id));
+    if (missing.length) {
       throw new NotFoundException(
-        `MetadataRegistry with ID ${data.metadata_registry_id} not found`,
+        `MetadataRegistry not found for IDs: ${missing.join(', ')}`,
       );
     }
 
-    return MetadataRegistryValue.create({
-      metadata_registry_id: data.metadata_registry_id,
-      value: data.value,
-    });
+    return MetadataRegistryValue.bulkCreate(
+      items.map(item => ({
+        metadata_registry_id: item.metadata_registry_id,
+        value: item.value,
+      })),
+    );
   }
+
 
   /**
    * Get all MetadataRegistryValues

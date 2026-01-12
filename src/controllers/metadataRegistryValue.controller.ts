@@ -20,6 +20,7 @@ import {
 
 import MetadataRegistryValueService from '../services/metadata-registry-value.service';
 import {
+  MetadataRegistryValueBulkCreateDto,
   MetadataRegistryValueCreateDto,
   MetadataRegistryValueUpdateDto,
 } from '../dto/metadata-registry-value.dto';
@@ -41,7 +42,7 @@ export class MetadataRegistryValueController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create MetadataRegistryValue' })
   @ApiResponse({ status: 201, description: 'MetadataRegistryValue created' })
-  create(@Body() body: MetadataRegistryValueCreateDto) {
+  create(@Body() body: MetadataRegistryValueBulkCreateDto) {
     return this.service.create(body);
   }
 
