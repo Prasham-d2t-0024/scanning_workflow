@@ -5,6 +5,7 @@ import {
   MetadataRegistryCreateDto,
   MetadataRegistryUpdateDto,
 } from '../dto/metadata-registry.dto';
+import Dropdown from 'src/models/dropdown.model';
 
 @Injectable()
 export default class MetadataRegistryService {
@@ -61,10 +62,12 @@ export default class MetadataRegistryService {
           model: ComponentType,
           as: 'componentType',
         },
+        {
+          model:Dropdown,
+          as:'dropdown'
+        }
       ],
       order: [['metadataOrder', 'ASC']],
-    }).catch((err)=>{
-      console.log(err);
     });
   }
 
@@ -118,8 +121,8 @@ export default class MetadataRegistryService {
       key: data.key ?? record.key,
       title: data.title ?? record.title,
       isrequired: data.isrequired ?? record.isrequired,
-      componenttype_id:
-      data.componenttype_id ?? record.componenttype_id,
+      componenttype_id:data.componenttype_id ?? record.componenttype_id,
+      dropdown_id:data.dropdown_id ?? record.dropdown_id,
       ismultiple: data.ismultiple ?? record.ismultiple,
     });
 

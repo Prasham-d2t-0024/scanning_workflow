@@ -11,6 +11,8 @@ import Menu from './menu.model';
 import RoleMenu from './role_menu.model';
 import UserMenu from './user_menu.model';
 import MetadataRegistryValue from './metadata_registry_value.model';
+import Dropdown from './dropdown.model';
+import DropdownOption from './dropdown-options.model';
 
 /**
  * =========================
@@ -143,6 +145,34 @@ User.hasMany(DigitizationCenter, {
    MetadataRegistryValue.belongsTo(MetadataRegistry, {
     foreignKey: 'metadata_registry_value_id',
     as: 'metadataRegistry',
+  });
+
+// =======================
+// Dropdown & DropdownOption Associations
+// =======================
+
+  Dropdown.hasMany(DropdownOption, {
+    foreignKey: 'dropdown_id',
+    as: 'options',
+  });
+
+  DropdownOption.belongsTo(Dropdown, {
+    foreignKey: 'dropdown_id',
+    as: 'dropdown',
+  });
+
+// =============================
+// Dropdown & Metadata registery
+// =============================
+  Dropdown.hasMany(MetadataRegistry, {
+    foreignKey: 'dropdown_id',
+    as: 'metadata',
+  });
+
+  // A metadata field may or may not have a dropdown
+  MetadataRegistry.belongsTo(Dropdown, {
+    foreignKey: 'dropdown_id',
+    as: 'dropdown',
   });
 
 /**

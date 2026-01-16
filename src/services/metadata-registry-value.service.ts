@@ -19,18 +19,15 @@ export default class MetadataRegistryValueService {
       return [];
     }
 
-    // 1️⃣ Collect unique metadata_registry_ids
     const registryIds = [
       ...new Set(items.map(i => i.metadata_registry_id)),
     ];
 
-    // 2️⃣ Fetch all registries at once
     const registries = await MetadataRegistry.findAll({
       where: { metadata_registry_id: registryIds },
       attributes: ['metadata_registry_id'],
     });
 
-    // 3️⃣ Validate all IDs exist
     const foundIds = new Set(
       registries.map(r => r.metadata_registry_id),
     );

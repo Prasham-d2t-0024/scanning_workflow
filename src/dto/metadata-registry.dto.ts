@@ -46,6 +46,14 @@ export class MetadataRegistryCreateDto {
   })
   @IsBoolean()
   ismultiple: boolean;
+
+  @ApiPropertyOptional({
+  example: 5,
+  description: 'Optional dropdown ID (only if metadata uses dropdown)',
+})
+  @IsOptional()
+  @IsInt()
+  dropdown_id?: number;
 }
 
 /**
@@ -84,6 +92,15 @@ export class MetadataRegistryUpdateDto {
   @IsOptional()
   @IsBoolean()
   ismultiple?: boolean;
+
+  @ApiPropertyOptional({
+    example: 5,
+    nullable: true,
+    description: 'Dropdown ID or null to remove dropdown',
+  })
+  @IsOptional()
+  @IsInt()
+  dropdown_id?: number | null;
 }
 
 

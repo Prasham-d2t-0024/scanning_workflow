@@ -29,6 +29,8 @@ import ProcessService from './services/process.service';
 import MenuGroupService from './services/menu-group.service'; 
 import { UserMenuController } from './controllers/user-menu.controllar';
 import UserMenuService from './services/user-menu.service';
+import { DropdownController } from './controllers/dropdown.controllar';
+import DropdownService from './services/dropdown.service';
 
 @Module({
   controllers: [
@@ -45,7 +47,8 @@ import UserMenuService from './services/user-menu.service';
     RoleMenuController,
     ProcessController, 
     MenuGroupController,
-    UserMenuController
+    UserMenuController,
+    DropdownController
   ],
   providers: [
     AuthService,
@@ -61,7 +64,8 @@ import UserMenuService from './services/user-menu.service';
     RoleMenuService,
     ProcessService,
     MenuGroupService,
-    UserMenuService
+    UserMenuService,
+    DropdownService
   ],
 })
 export class AppModule {}
