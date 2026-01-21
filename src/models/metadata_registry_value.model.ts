@@ -8,7 +8,7 @@ export interface MetadataRegistryValueAttributes {
   metadata_registry_value_id?: number;
   metadata_registry_id: number;
   value: string | number;
-
+  item_id: number;
   createdAt?: Date;
   updatedAt?: Date;
   deletedAt?: Date;
@@ -36,6 +36,7 @@ class MetadataRegistryValue
   public metadata_registry_value_id!: number;
   public metadata_registry_id!: number;
   public value!: string | number;
+  public item_id!: number;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -66,7 +67,14 @@ MetadataRegistryValue.init(
       type: DataTypes.TEXT || DataTypes.NUMBER,
       allowNull: false,
     },
-
+    item_id: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+      references: {
+        model: 'items',
+        key: 'id',
+      },
+    },
     createdAt: { type: DataTypes.DATE },
     updatedAt: { type: DataTypes.DATE },
     deletedAt: { type: DataTypes.DATE },

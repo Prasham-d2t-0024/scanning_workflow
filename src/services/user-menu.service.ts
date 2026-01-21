@@ -10,6 +10,7 @@ import {
   BulkCreateUserMenuDto,
   UpdateUserMenuDto,
 } from '../dto/user-menu.dto';
+import { MenuGroup, Role } from 'src/models';
 
 @Injectable()
 export default class UserMenuService {
@@ -71,6 +72,11 @@ export default class UserMenuService {
    */
   async findById(id: number) {
     const userMenu = await UserMenu.findByPk(id);
+    console.log("userMenu",userMenu)
+    // const userMenuIds = (userMenu).map((menu)=>menu.menu_id)
+    const allMenus = await Menu.findAll();
+
+    // const filteredUserMenu = allMenus.filter((menu)=>menu.menu_id.)
 
     if (!userMenu) {
       throw new NotFoundException(
@@ -85,16 +91,29 @@ export default class UserMenuService {
    * Get menus by user
    */
   async findByUser(user_id: number) {
-    const user = await User.findByPk(user_id);
+    const user = await User.findByPk(user_id, {
+      include: [
+        {
+          model: Menu,
+          as: 'menus',
+          through: {
+            attributes: [], // hides user_menu join table
+          },
+          include: [
+            {
+              model: MenuGroup,
+              as: 'menuGroup', // optional but usually needed
+            },
+          ],
+        },
+      ],
+    });
+
     if (!user) {
-      throw new NotFoundException(
-        `User with ID ${user_id} not found`,
-      );
+      throw new NotFoundException(`User with ID ${user_id} not found`);
     }
 
-    return UserMenu.findAll({
-      where: { user_id },
-    });
+    return user;
   }
 
   /**

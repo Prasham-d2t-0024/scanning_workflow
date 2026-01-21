@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import MetadataRegistryValue from '../models/metadata_registry_value.model';
 import MetadataRegistry from '../models/metadata_registry.model';
 import {
@@ -6,45 +6,88 @@ import {
   MetadataRegistryValueCreateDto,
   MetadataRegistryValueUpdateDto,
 } from '../dto/metadata-registry-value.dto';
+import Item from 'src/models/item.model';
+import { Op } from 'sequelize';
 
 @Injectable()
 export default class MetadataRegistryValueService {
   /**
    * Create MetadataRegistryValue
    */
-  async create(data: MetadataRegistryValueBulkCreateDto) {
-    const items = data.items;
+  // async create(data: MetadataRegistryValueBulkCreateDto) {
+  //   const items = data.items;
 
-    if (!items.length) {
-      return [];
-    }
+  //   if (!items.length) {
+  //     return [];
+  //   }
 
-    const registryIds = [
-      ...new Set(items.map(i => i.metadata_registry_id)),
-    ];
+  //   const registryIds = [
+  //     ...new Set(items.map(i => i.metadata_registry_id)),
+  //   ];
 
-    const registries = await MetadataRegistry.findAll({
-      where: { metadata_registry_id: registryIds },
-      attributes: ['metadata_registry_id'],
-    });
+  //   const registries = await MetadataRegistry.findAll({
+  //     where: { metadata_registry_id: registryIds },
+  //     attributes: ['metadata_registry_id'],
+  //   });
 
-    const foundIds = new Set(
-      registries.map(r => r.metadata_registry_id),
-    );
+  //   const foundIds = new Set(
+  //     registries.map(r => r.metadata_registry_id),
+  //   );
 
-    const missing = registryIds.filter(id => !foundIds.has(id));
-    if (missing.length) {
-      throw new NotFoundException(
-        `MetadataRegistry not found for IDs: ${missing.join(', ')}`,
+  //   const missing = registryIds.filter(id => !foundIds.has(id));
+  //   if (missing.length) {
+  //     throw new NotFoundException(
+  //       `MetadataRegistry not found for IDs: ${missing.join(', ')}`,
+  //     );
+  //   }
+
+  //   return MetadataRegistryValue.bulkCreate(
+  //     items.map(item => ({
+  //       metadata_registry_id: item.metadata_registry_id,
+  //       value: item.value,
+  //     })),
+  //   );
+  // }
+
+  async create(
+    data: MetadataRegistryValueBulkCreateDto,
+  ) {
+    const transaction = await Item.sequelize.transaction();
+
+    try {
+      const itemName = data.file_name;
+
+      const item = await Item.create(
+        { name: itemName },
+        { transaction },
       );
-    }
 
-    return MetadataRegistryValue.bulkCreate(
-      items.map(item => ({
-        metadata_registry_id: item.metadata_registry_id,
-        value: item.value,
-      })),
-    );
+      if (!item) {
+        throw new BadRequestException('Item creation failed');
+      }
+
+        const metadataValues = data.items.map((entry) => ({
+          item_id: item.item_id,
+          metadata_registry_id: entry.metadata_registry_id,
+          value: entry.value,
+        }
+      ));
+
+      await MetadataRegistryValue.bulkCreate(metadataValues, {
+        transaction,
+      });
+
+      await transaction.commit();
+
+      return {
+        success: true,
+        item_id: item.item_id,
+      };
+
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 
 

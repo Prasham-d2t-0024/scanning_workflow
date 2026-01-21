@@ -7,6 +7,7 @@ import connection from '../config/dbconnection';
 export interface MenuGroupAttributes {
   menu_group_id?: number;
   name: string;
+  icon?: string;
   order?: number;
   status: 'active' | 'inactive';
 
@@ -29,6 +30,7 @@ class MenuGroup
 {
   public menu_group_id!: number;
   public name!: string;
+  public icon?: string;
   public order?: number;
   public status!: 'active' | 'inactive';
 
@@ -51,6 +53,11 @@ MenuGroup.init(
       type: DataTypes.STRING(100),
       allowNull: false,
       unique: true,
+    },
+
+    icon: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
     },
 
     order: {

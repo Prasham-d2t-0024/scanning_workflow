@@ -18,6 +18,14 @@ export class CreateMenuGroupDto {
   name!: string;
 
   @ApiPropertyOptional({
+    example: 'admin',
+    description: 'Icon name',
+  })
+  @IsOptional()
+  @IsString()
+  icon?: string;
+
+  @ApiPropertyOptional({
     example: 1,
     description: 'Sorting order of the menu group',
   })
@@ -46,6 +54,14 @@ export class UpdateMenuGroupDto {
   @IsOptional()
   @IsString()
   name?: string;
+
+  @ApiPropertyOptional({
+    example: 'admin',
+    description: 'Icon name',
+  })
+  @IsOptional()
+  @IsString()
+  icon?: string;
 
   @ApiPropertyOptional({
     example: 2,

@@ -22,6 +22,8 @@ export class MetadataRegistryValueCreateDto {
   @IsString()
   @ValidateIf(o => typeof o.value === 'number')
   @IsNumber()
+
+  @IsString()
   value: string | number;
 }
 
@@ -46,4 +48,7 @@ export class MetadataRegistryValueBulkCreateDto {
   @ValidateNested({ each: true })
   @Type(() => MetadataRegistryValueCreateDto)
   items: MetadataRegistryValueCreateDto[];
+  
+  @IsString()
+  file_name:string;
 }

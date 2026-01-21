@@ -13,6 +13,7 @@ export default class MenuGroupService {
   async create(data: CreateMenuGroupDto) {
     return MenuGroup.create({
       name: data.name,
+      icon: data.icon,
       order: data.order,
       status: data.status,
     });
@@ -53,6 +54,7 @@ export default class MenuGroupService {
 
     await group.update({
       name: data.name ?? group.name,
+      icon: data.icon ?? group.icon,
       order: data.order ?? group.order,
       status: data.status ?? group.status,
     });
