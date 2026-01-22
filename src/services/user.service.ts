@@ -48,38 +48,113 @@ export default class UserService {
   /**
    * Get all users
    */
-  async findAll() {
-    const users = await User.findAll({
-      attributes: { exclude: ['password'] },
+  // async findAll() {
+  //   const users = await User.findAll({
+  //     attributes: { exclude: ['password'] },
 
-      include: [
-        {
-          model: Role,
-          as: 'roles',
-          attributes: ['role_id', 'name'],
-          through: { attributes: [] },
-        },
-        {
-          model: Menu,
-          as: 'menus',
-          attributes: [
-            'menu_id',
-            'menu_group_id',
-            'name',
-            'path',
-            'icon',
-            'order',
-            'status',
-          ],
-          through: { attributes: [] },
-        },
-      ],
+  //     include: [
+  //       {
+  //         model: Role,
+  //         as: 'roles',
+  //         attributes: ['role_id', 'name'],
+  //         through: { attributes: [] },
+  //       },
+  //       {
+  //         model: Menu,
+  //         as: 'menus',
+  //         attributes: [
+  //           'menu_id',
+  //           'menu_group_id',
+  //           'name',
+  //           'path',
+  //           'icon',
+  //           'order',
+  //           'status',
+  //         ],
+  //         through: { attributes: [] },
+  //       },
+  //     ],
 
-      subQuery: false,
+  //     subQuery: false,
+  //   });
+
+  //   return users;
+  // }
+
+ async findAll() {
+  const users = await User.findAll({
+    attributes: { exclude: ['password'] },
+
+    include: [
+      {
+        model: Role,
+        as: 'roles',
+        attributes: ['role_id', 'name'],
+        include: [
+          {
+            model: Menu,
+            as: 'menus',
+            attributes: [
+              'menu_id',
+              'menu_group_id',
+              'name',
+              'path',
+              'icon',
+              'order',
+              'status',
+            ],
+            through: { attributes: [] },
+          },
+        ],
+        through: { attributes: [] },
+      },
+      {
+        model: Menu,
+        as: 'menus', // user-menu
+        attributes: [
+          'menu_id',
+          'menu_group_id',
+          'name',
+          'path',
+          'icon',
+          'order',
+          'status',
+        ],
+        through: { attributes: [] },
+      },
+    ],
+
+    subQuery: false,
+  });
+
+  return users.map((user: any) => {
+    const roleMenus =
+      user.roles?.flatMap((role: any) => role.menus || []) || [];
+
+    const userMenus = user.menus || [];
+
+    const uniqueMenusMap = new Map<number, any>();
+    [...roleMenus, ...userMenus].forEach((menu) => {
+      uniqueMenusMap.set(menu.menu_id, menu);
     });
 
-    return users;
-  }
+    const uniqueMenus = Array.from(uniqueMenusMap.values());
+
+    const userJson = user.toJSON();
+
+    const cleanedRoles = userJson.roles.map((role: any) => {
+      const { menus, ...roleData } = role;
+      return roleData;
+    });
+
+    return {
+      ...userJson,
+      roles: cleanedRoles,
+      menus: uniqueMenus, 
+    };
+  });
+}
+
 
 
   /**
@@ -94,7 +169,6 @@ export default class UserService {
         throw new NotFoundException(`User with ID ${userId} not found`);
       }
 
-      // 1️⃣ Update user master data
       const updatePayload: any = {
         full_name: input.full_name,
         username: input.username,
@@ -106,12 +180,10 @@ export default class UserService {
 
       await user.update(updatePayload, { transaction: t });
 
-      // 2️⃣ Update roles (replace all)
       if (Array.isArray(input.role_ids)) {
         await user.setRoles(input.role_ids, { transaction: t });
       }
 
-      // 3️⃣ Update menus (replace all)
       if (Array.isArray(input.menu_ids)) {
         await user.setMenus(input.menu_ids, { transaction: t });
       }

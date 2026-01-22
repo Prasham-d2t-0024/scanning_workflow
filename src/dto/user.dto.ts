@@ -49,6 +49,7 @@ export class CreateUserDto {
   role_ids!: number[];
 
   @IsArray()
+  @IsOptional()
   @ArrayNotEmpty()
   @IsInt({ each: true })
   menu_ids!: number[];
