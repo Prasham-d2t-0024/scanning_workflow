@@ -3,11 +3,10 @@ import MetadataRegistryValue from '../models/metadata_registry_value.model';
 import MetadataRegistry from '../models/metadata_registry.model';
 import {
   MetadataRegistryValueBulkCreateDto,
-  MetadataRegistryValueCreateDto,
+  MetadataRegistryValueBulkUpdateDto,
   MetadataRegistryValueUpdateDto,
 } from '../dto/metadata-registry-value.dto';
 import Item from 'src/models/item.model';
-import { Op } from 'sequelize';
 
 @Injectable()
 export default class MetadataRegistryValueService {
@@ -49,47 +48,73 @@ export default class MetadataRegistryValueService {
   //   );
   // }
 
-  async create(
-    data: MetadataRegistryValueBulkCreateDto,
-  ) {
-    const transaction = await Item.sequelize.transaction();
+ async create(data: MetadataRegistryValueBulkCreateDto) {
+  const transaction = await MetadataRegistryValue.sequelize.transaction();
 
-    try {
-      const itemName = data.file_name;
+  try {
+    let itemId = data.item_id;
 
-      const item = await Item.create(
-        { name: itemName },
-        { transaction },
-      );
-
-      if (!item) {
-        throw new BadRequestException('Item creation failed');
+    // 🔹 CASE 1: item_id not provided → create new item (old behavior)
+    if (!itemId) {
+      if (!data.file_name) {
+        throw new BadRequestException('file_name is required when creating a new item');
       }
 
-        const metadataValues = data.items.map((entry) => ({
-          item_id: item.item_id,
-          metadata_registry_id: entry.metadata_registry_id,
-          value: entry.value,
-        }
-      ));
+      const item = await Item.create(
+        { name: data.file_name },
+        { transaction }
+      );
 
-      await MetadataRegistryValue.bulkCreate(metadataValues, {
+      itemId = item.item_id;
+    }
+    // 🔹 CASE 2: item_id provided → validate item exists
+    else {
+      const existingItem = await Item.findByPk(itemId, { transaction });
+      if (!existingItem) {
+        throw new NotFoundException(`Item with ID ${itemId} not found`);
+      }
+    }
+
+    // 🔹 Process metadata values (UPSERT logic)
+    for (const entry of data.items) {
+      const existingValue = await MetadataRegistryValue.findOne({
+        where: {
+          item_id: itemId,
+          metadata_registry_id: entry.metadata_registry_id,
+        },
         transaction,
       });
 
-      await transaction.commit();
-
-      return {
-        success: true,
-        item_id: item.item_id,
-      };
-
-    } catch (error) {
-      await transaction.rollback();
-      throw error;
+      if (existingValue) {
+        // UPDATE
+        await existingValue.update(
+          { value: entry.value },
+          { transaction }
+        );
+      } else {
+        // INSERT
+        await MetadataRegistryValue.create(
+          {
+            item_id: itemId,
+            metadata_registry_id: entry.metadata_registry_id,
+            value: entry.value,
+          },
+          { transaction }
+        );
+      }
     }
-  }
 
+    await transaction.commit();
+
+    return {
+      success: true,
+      item_id: itemId,
+    };
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+}
 
   /**
    * Get all MetadataRegistryValues
@@ -129,6 +154,25 @@ export default class MetadataRegistryValueService {
   }
 
   /**
+ * Get MetadataRegistryValues by Item ID
+ * @param itemId Item ID
+ */
+  async findByItemId(itemId: number) {
+    return MetadataRegistryValue.findAll({
+      where: {
+        item_id: itemId,
+      },
+      include: [
+        {
+          model: MetadataRegistry,
+          as: 'metadataRegistry',
+        },
+      ],
+      order: [['createdAt', 'DESC']],
+    })
+  }
+
+  /**
    * Get values by MetadataRegistry ID
    */
   async findByMetadataRegistry(metadata_registry_id: number) {
@@ -151,18 +195,18 @@ export default class MetadataRegistryValueService {
   /**
    * Update MetadataRegistryValue
    */
-  async update(
-    id: number,
-    data: MetadataRegistryValueUpdateDto,
-  ) {
-    const value = await this.findById(id);
+  // async update(
+  //   id: number,
+  //   data: MetadataRegistryValueUpdateDto,
+  // ) {
+  //   const value = await this.findById(id);
 
-    await value.update({
-      value: data.value ?? value.value,
-    });
+  //   await value.update({
+  //     value: data.value ?? value.value,
+  //   });
 
-    return value;
-  }
+  //   return value;
+  // }
 
   /**
    * Soft delete MetadataRegistryValue
@@ -172,5 +216,57 @@ export default class MetadataRegistryValueService {
     await value.destroy(); // paranoid = true
 
     return { success: true, id };
+  }
+
+  /**
+ * Bulk update MetadataRegistryValues by metadata_registry_value_id
+ */
+   async update(data: MetadataRegistryValueBulkUpdateDto) {
+    const transaction = await MetadataRegistryValue.sequelize.transaction();
+
+    try {
+      const ids = data.items.map(i => i.metadata_registry_value_id);
+
+      const existing = await MetadataRegistryValue.findAll({
+        where: { metadata_registry_value_id: ids },
+        attributes: ['metadata_registry_value_id'],
+        transaction,
+      });
+
+      if (existing.length !== ids.length) {
+        throw new NotFoundException(
+          'One or more MetadataRegistryValues not found',
+        );
+      }
+
+      await Promise.all(
+        data.items.map(item =>
+          MetadataRegistryValue.update(
+            { value: item.value },
+            {
+              where: {
+                metadata_registry_value_id: item.metadata_registry_value_id,
+              },
+              transaction,
+            },
+          )
+        )
+      ).then((resp)=>{
+        console.log("3333333333",resp);
+      }).catch((err)=>{
+        console.log("7777777777",err);
+      })
+
+      await transaction.commit();
+
+      return {
+        success: true,
+        updatedCount: data.items.length,
+      };
+    } catch (error) {
+      console.log("=======",error);
+      await transaction.rollback();
+      throw error;
+    }
   }
 }

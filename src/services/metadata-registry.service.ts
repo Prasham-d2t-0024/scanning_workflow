@@ -6,6 +6,7 @@ import {
   MetadataRegistryUpdateDto,
 } from '../dto/metadata-registry.dto';
 import Dropdown from 'src/models/dropdown.model';
+import MetadataGroup from 'src/models/metadata-group.model';
 
 @Injectable()
 export default class MetadataRegistryService {
@@ -16,6 +17,14 @@ export default class MetadataRegistryService {
     const t = await MetadataRegistry.sequelize.transaction();
 
     try {
+      const group = await MetadataGroup.findByPk(data.metadata_group_id, {
+        transaction: t,
+      });
+
+      if (!group) {
+        throw new BadRequestException('Invalid metadata group');
+      }
+
       const existing = await MetadataRegistry.findOne({
         where: { key: data.key },
         transaction: t,
@@ -23,12 +32,12 @@ export default class MetadataRegistryService {
 
       if (existing) {
         throw new BadRequestException(
-          `Metadata Registry with name '${data.key}' already exists`
+          `Metadata Registry with key '${data.key}' already exists`
         );
       }
 
       const maxOrder =
-      (await MetadataRegistry.max('metadataOrder', { transaction: t })) ?? 0;
+        (await MetadataRegistry.max('metadataOrder', { transaction: t })) ?? 0;
 
       const record = await MetadataRegistry.create(
         {
@@ -36,6 +45,8 @@ export default class MetadataRegistryService {
           title: data.title,
           isrequired: data.isrequired,
           componenttype_id: data.componenttype_id,
+          dropdown_id: data.dropdown_id,
+          metadata_group_id: data.metadata_group_id, // ✅ ADD
           ismultiple: data.ismultiple,
           metadataOrder: Number(maxOrder) + 1,
         },
@@ -44,28 +55,21 @@ export default class MetadataRegistryService {
 
       await t.commit();
       return record;
-
     } catch (error) {
       await t.rollback();
       throw error;
     }
   }
 
-
   /**
    * Get all Metadata Registry entries
    */
   async findAll() {
     return MetadataRegistry.findAll({
-      include: [
-        {
-          model: ComponentType,
-          as: 'componentType',
-        },
-        {
-          model:Dropdown,
-          as:'dropdown'
-        }
+        include: [
+        { model: ComponentType, as: 'componentType' },
+        { model: Dropdown, as: 'dropdown' },
+        { model: MetadataGroup, as: 'metadataGroup' },
       ],
       order: [['metadataOrder', 'ASC']],
     });
@@ -117,12 +121,21 @@ export default class MetadataRegistryService {
   async update(id: number, data: MetadataRegistryUpdateDto) {
     const record = await this.findById(id);
 
+    if (data.metadata_group_id) {
+      const group = await MetadataGroup.findByPk(data.metadata_group_id);
+      if (!group) {
+        throw new BadRequestException('Invalid metadata group');
+      }
+    }
+
     await record.update({
       key: data.key ?? record.key,
       title: data.title ?? record.title,
       isrequired: data.isrequired ?? record.isrequired,
-      componenttype_id:data.componenttype_id ?? record.componenttype_id,
-      dropdown_id:data.dropdown_id ?? record.dropdown_id,
+      componenttype_id: data.componenttype_id ?? record.componenttype_id,
+      dropdown_id: data.dropdown_id ?? record.dropdown_id,
+      metadata_group_id:
+        data.metadata_group_id ?? record.metadata_group_id,
       ismultiple: data.ismultiple ?? record.ismultiple,
     });
 

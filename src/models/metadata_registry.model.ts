@@ -2,6 +2,7 @@ import { DataTypes, Model, Optional } from 'sequelize';
 import connection from '../config/dbconnection';
 import ComponentType from './componenttype.model';
 import Dropdown from './dropdown.model';
+import MetadataGroup from './metadata-group.model';
 
 /**
  * Attributes
@@ -15,6 +16,7 @@ export interface MetadataRegistryAttributes {
   dropdown_id: number;
   ismultiple: boolean;
   metadataOrder: number
+  metadata_group_id: number;
 
   createdAt?: Date;
   updatedAt?: Date;
@@ -42,11 +44,12 @@ class MetadataRegistry
   public dropdown_id!: number;
   public ismultiple!: boolean;
   public metadataOrder!: number;
+  public metadata_group_id: number;
 
   // association (optional typing)
   public readonly componentType?: ComponentType;
-
   //association
+  public readonly metadataGroup?: MetadataGroup;
   public readonly dropdown?: Dropdown
 
   public readonly createdAt!: Date;
@@ -108,6 +111,14 @@ MetadataRegistry.init(
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
       defaultValue: 0,
+    },
+    metadata_group_id: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+      references: {
+        model: 'metadata_groups',
+        key: 'metadata_group_id',
+      },
     },
     createdAt: { type: DataTypes.DATE },
     updatedAt: { type: DataTypes.DATE },

@@ -31,6 +31,8 @@ import { UserMenuController } from './controllers/user-menu.controllar';
 import UserMenuService from './services/user-menu.service';
 import { DropdownController } from './controllers/dropdown.controllar';
 import DropdownService from './services/dropdown.service';
+import { MetadataGroupController } from './controllers/metadata-group.controller';
+import MetadataGroupService from './services/metadata-group.service';
 
 @Module({
   controllers: [
@@ -48,7 +50,8 @@ import DropdownService from './services/dropdown.service';
     ProcessController, 
     MenuGroupController,
     UserMenuController,
-    DropdownController
+    DropdownController,
+    MetadataGroupController
   ],
   providers: [
     AuthService,
@@ -65,7 +68,8 @@ import DropdownService from './services/dropdown.service';
     ProcessService,
     MenuGroupService,
     UserMenuService,
-    DropdownService
+    DropdownService,
+    MetadataGroupService
   ],
 })
 export class AppModule {}

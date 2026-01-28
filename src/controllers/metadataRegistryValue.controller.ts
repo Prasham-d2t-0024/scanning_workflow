@@ -21,6 +21,7 @@ import {
 import MetadataRegistryValueService from '../services/metadata-registry-value.service';
 import {
   MetadataRegistryValueBulkCreateDto,
+  MetadataRegistryValueBulkUpdateDto,
   MetadataRegistryValueCreateDto,
   MetadataRegistryValueUpdateDto,
 } from '../dto/metadata-registry-value.dto';
@@ -68,16 +69,26 @@ export class MetadataRegistryValueController {
   }
 
   /**
+   * Get MetadataRegistryValue by itemID
+   */
+  @Get('item/:itemId')
+  @ApiOperation({ summary: 'Get MetadataRegistryValue by itemId' })
+  @ApiResponse({ status: 200 })
+  @ApiResponse({ status: 404, description: 'MetadataRegistryValue not found' })
+  getByItemId(@Param('itemId', ParseIntPipe) itemId: number) {
+    return this.service.findByItemId(itemId);
+  }
+
+  /**
    * Update MetadataRegistryValue
    */
-  @Put(':id')
-  @ApiOperation({ summary: 'Update MetadataRegistryValue' })
-  @ApiResponse({ status: 200 })
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: MetadataRegistryValueUpdateDto,
+  @Put('bulk')
+  @ApiOperation({ summary: 'Bulk update MetadataRegistryValues by ID' })
+  @ApiResponse({ status: 200, description: 'MetadataRegistryValues updated' })
+  bulkUpdate(
+    @Body() body: MetadataRegistryValueBulkUpdateDto,
   ) {
-    return this.service.update(id, body);
+    return this.service.update(body);
   }
 
   /**

@@ -13,6 +13,7 @@ import UserMenu from './user_menu.model';
 import MetadataRegistryValue from './metadata_registry_value.model';
 import Dropdown from './dropdown.model';
 import DropdownOption from './dropdown-options.model';
+import MetadataGroup from './metadata-group.model';
 
 /**
  * =========================
@@ -175,6 +176,22 @@ User.hasMany(DigitizationCenter, {
     as: 'dropdown',
   });
 
+  /**
+ * =========================
+ * MetadataGroup & MetadataRegistry
+ * =========================
+ */
+
+  MetadataGroup.hasMany(MetadataRegistry, {
+    foreignKey: 'metadata_group_id',
+    as: 'metadata',
+  });
+
+  MetadataRegistry.belongsTo(MetadataGroup, {
+    foreignKey: 'metadata_group_id',
+    as: 'metadataGroup',
+  });
+
 /**
  * =========================
  * Exports
@@ -192,5 +209,6 @@ export {
   Menu,
   RoleMenu,
   DigitizationCenter,
-  UserMenu
+  UserMenu,
+  MetadataGroup
 };

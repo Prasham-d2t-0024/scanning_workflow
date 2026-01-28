@@ -8,6 +8,7 @@ import {
   Min,
   IsArray,
   ValidateNested,
+  IsNumber,
 } from 'class-validator';
 
 /**
@@ -54,6 +55,10 @@ export class MetadataRegistryCreateDto {
   @IsOptional()
   @IsInt()
   dropdown_id?: number;
+
+  @ApiProperty()
+  @IsNumber()
+  metadata_group_id: number;
 }
 
 /**
@@ -101,6 +106,10 @@ export class MetadataRegistryUpdateDto {
   @IsOptional()
   @IsInt()
   dropdown_id?: number | null;
+
+  @ApiProperty()
+  @IsNumber()
+  metadata_group_id: number;
 }
 
 

@@ -31,12 +31,27 @@ export class MetadataRegistryValueCreateDto {
  * Update MetadataRegistryValue DTO
  */
 export class MetadataRegistryValueUpdateDto {
+  @ApiProperty({ example: 94 })
+  @IsInt()
+  metadata_registry_value_id: number;
+
   @ApiPropertyOptional({
     example: 'Updated Label',
-    description: 'Updated value for the metadata key',
   })
   @IsOptional()
+  @IsString()
   value?: string | number;
+}
+
+export class MetadataRegistryValueBulkUpdateDto {
+  @ApiProperty({
+    type: [MetadataRegistryValueUpdateDto],
+    description: 'Array of metadata registry values',
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => MetadataRegistryValueUpdateDto)
+  items: MetadataRegistryValueUpdateDto[];
 }
 
 export class MetadataRegistryValueBulkCreateDto {
@@ -49,6 +64,19 @@ export class MetadataRegistryValueBulkCreateDto {
   @Type(() => MetadataRegistryValueCreateDto)
   items: MetadataRegistryValueCreateDto[];
   
+  @ApiPropertyOptional({
+    description: 'Existing Item ID (optional)',
+    example: 13,
+  })
+  @IsOptional()
+  @IsInt()
+  item_id?: number;
+
+  @ApiPropertyOptional({
+    description: 'File name (required only when creating new item)',
+    example: 'case_2026',
+  })
+  @IsOptional()
   @IsString()
-  file_name:string;
+  file_name?: string;
 }
