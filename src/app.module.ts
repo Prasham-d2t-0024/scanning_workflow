@@ -33,6 +33,8 @@ import { DropdownController } from './controllers/dropdown.controllar';
 import DropdownService from './services/dropdown.service';
 import { MetadataGroupController } from './controllers/metadata-group.controller';
 import MetadataGroupService from './services/metadata-group.service';
+import { DmsMasterController } from './controllers/dms-master.controller';
+import DmsMasterService from './services/dms-master.service';
 
 @Module({
   controllers: [
@@ -51,7 +53,8 @@ import MetadataGroupService from './services/metadata-group.service';
     MenuGroupController,
     UserMenuController,
     DropdownController,
-    MetadataGroupController
+    MetadataGroupController,
+    DmsMasterController
   ],
   providers: [
     AuthService,
@@ -69,7 +72,8 @@ import MetadataGroupService from './services/metadata-group.service';
     MenuGroupService,
     UserMenuService,
     DropdownService,
-    MetadataGroupService
+    MetadataGroupService,
+    DmsMasterService
   ],
 })
 export class AppModule {}
