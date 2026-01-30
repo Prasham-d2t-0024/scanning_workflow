@@ -1,5 +1,11 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import connection from '../config/dbconnection';
+import Batch from './batch.model';
+
+export enum ItemStatus {
+  NOT_COMMITED = -1,
+  COMMITED = 0,
+}
 
 /**
  * Attributes
@@ -7,6 +13,8 @@ import connection from '../config/dbconnection';
 export interface ItemAttributes {
   item_id?: number;
   name: string;
+  batch_id: number;
+  item_status:ItemStatus;
 
   createdAt?: Date;
   updatedAt?: Date;
@@ -28,6 +36,10 @@ class Item
 {
   public item_id!: number;
   public name!: string;
+  public batch_id: number;
+  public item_status: ItemStatus;
+
+  public batch?: Batch;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -51,6 +63,22 @@ Item.init(
       unique: true,
     },
 
+    batch_id: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+      references: {
+        model: 'batch',      // table name
+        key: 'batch_id',
+      },
+    },
+
+    item_status: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+      defaultValue: ItemStatus.NOT_COMMITED,
+    },
+
+    
     createdAt: { type: DataTypes.DATE },
     updatedAt: { type: DataTypes.DATE },
     deletedAt: { type: DataTypes.DATE },

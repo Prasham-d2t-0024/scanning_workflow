@@ -10,6 +10,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -38,8 +39,9 @@ export class ItemController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create item' })
   @ApiResponse({ status: 201, description: 'Item created successfully' })
-  create(@Body() body: ItemCreateDto) {
-    return this.service.create(body);
+  create(@Body() body: ItemCreateDto, @Req() req: any) {
+    let userId = req.user.user_id;
+    return this.service.create(body,userId);
   }
 
   /**
@@ -50,6 +52,14 @@ export class ItemController {
   @ApiResponse({ status: 200 })
   list() {
     return this.service.findAll();
+  }
+
+  @Get('my/uncommitted')
+  @ApiOperation({ summary: 'Get my uncommitted items' })
+  @ApiResponse({ status: 200 })
+  getMyUncommittedItems(@Req() req: any) {
+    const userId = req.user.user_id;
+    return this.service.findUserUncommittedItems(userId);
   }
 
   /**

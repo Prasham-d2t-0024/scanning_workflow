@@ -14,6 +14,8 @@ import MetadataRegistryValue from './metadata_registry_value.model';
 import Dropdown from './dropdown.model';
 import DropdownOption from './dropdown-options.model';
 import MetadataGroup from './metadata-group.model';
+import Batch from './batch.model';
+import Item from './item.model';
 
 /**
  * =========================
@@ -191,6 +193,37 @@ User.hasMany(DigitizationCenter, {
     foreignKey: 'metadata_group_id',
     as: 'metadataGroup',
   });
+
+   /**
+   * =========================
+   * Batch & User
+   * =========================
+  */
+    Batch.belongsTo(User, {
+      foreignKey: 'user_id',
+      as: 'user',
+    });
+
+    User.hasMany(Batch, {
+      foreignKey: 'user_id',
+      as: 'batches',
+    });
+
+   /**
+   * =========================
+   * Batch & Item
+   * =========================
+  */
+    Item.belongsTo(Batch, {
+      foreignKey: 'batch_id',
+      as: 'batch',
+    });
+
+    Batch.hasMany(Item, {
+      foreignKey: 'batch_id',
+      as: 'items',
+    });
+
 
 /**
  * =========================

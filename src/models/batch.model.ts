@@ -6,13 +6,17 @@ import connection from "../config/dbconnection";
  */
 export interface BatchAttributes {
   batch_id?: number;
-  name: string;
-  status: string;
+  // status: string;
+  bundle_name?: string;
+  batch_delivery_date?: Date;
+  is_commited?: boolean;
+  user_id?: number;
 
   createdAt?: Date;
   updatedAt?: Date;
   deletedAt?: Date;
 }
+
 
 /**
  * Input type (for create)
@@ -34,8 +38,11 @@ class Batch
   implements BatchAttributes
 {
   public batch_id!: number;
-  public name!: string;
-  public status!: string;
+  // public status!: string;
+  public bundle_name!: string;
+  public batch_delivery_date!: Date;
+  public is_commited!: boolean;
+  public user_id!: number;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -53,17 +60,37 @@ Batch.init(
       primaryKey: true,
     },
 
-    name: {
+    // status: {
+    //   type: DataTypes.STRING(50),
+    //   allowNull: false,
+    //   defaultValue: "active",
+    //   // optional improvement:
+    //   // type: DataTypes.ENUM("active", "inactive"),
+    // },
+
+     bundle_name: {
       type: DataTypes.STRING(255),
-      allowNull: false,
+      allowNull: true,
     },
 
-    status: {
-      type: DataTypes.STRING(50),
+    batch_delivery_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+
+    is_commited: {
+      type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: "active",
-      // optional improvement:
-      // type: DataTypes.ENUM("active", "inactive"),
+      defaultValue: false,
+    },
+
+    user_id: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+      references: {
+        model: 'users',
+        key: 'user_id',
+      },
     },
 
     createdAt: { type: DataTypes.DATE, allowNull: true },

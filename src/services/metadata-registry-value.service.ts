@@ -7,9 +7,12 @@ import {
   MetadataRegistryValueUpdateDto,
 } from '../dto/metadata-registry-value.dto';
 import Item from 'src/models/item.model';
+import ItemService from './item.service';
 
 @Injectable()
 export default class MetadataRegistryValueService {
+
+  constructor(protected itemSerivce: ItemService){}
   /**
    * Create MetadataRegistryValue
    */
@@ -48,7 +51,7 @@ export default class MetadataRegistryValueService {
   //   );
   // }
 
- async create(data: MetadataRegistryValueBulkCreateDto) {
+ async create(data: MetadataRegistryValueBulkCreateDto, userId:any) {
   const transaction = await MetadataRegistryValue.sequelize.transaction();
 
   try {
@@ -60,12 +63,13 @@ export default class MetadataRegistryValueService {
         throw new BadRequestException('file_name is required when creating a new item');
       }
 
-      const item = await Item.create(
+      const itemResult = await this.itemSerivce.create(
         { name: data.file_name },
-        { transaction }
+         userId, 
+        transaction
       );
 
-      itemId = item.item_id;
+      itemId = itemResult.item_id;
     }
     // 🔹 CASE 2: item_id provided → validate item exists
     else {
@@ -111,6 +115,7 @@ export default class MetadataRegistryValueService {
       item_id: itemId,
     };
   } catch (error) {
+    console.log("METADATA REGISTERY CRATE ERROR -> ", error)
     await transaction.rollback();
     throw error;
   }

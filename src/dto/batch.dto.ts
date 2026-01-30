@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, IsIn } from 'class-validator';
+import { Expose, Transform } from 'class-transformer';
+import { IsString, IsOptional, IsIn, IsDateString } from 'class-validator';
 
 /**
  * Create Batch DTO
@@ -41,4 +42,14 @@ export class BatchUpdateDto {
   @IsOptional()
   @IsIn(['active', 'inactive'])
   status?: 'active' | 'inactive';
+}
+
+export class BatchCommitDto {
+  @ApiPropertyOptional({
+    example: '2026-01-30',
+    description: 'Batch delivery date (YYYY-MM-DD))',
+  })
+  @IsOptional()
+  @IsString()
+  batch_delivery_date?: string;
 }

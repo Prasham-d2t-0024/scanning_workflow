@@ -10,6 +10,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,7 +20,7 @@ import {
 } from '@nestjs/swagger';
 
 import BatchService from '../services/batch.service';
-import { BatchCreateDto, BatchUpdateDto } from '../dto/batch.dto';
+import { BatchCommitDto, BatchCreateDto, BatchUpdateDto } from '../dto/batch.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('Batches')
@@ -75,6 +76,23 @@ export class BatchController {
   ) {
     return this.service.update(id, body);
   }
+
+  /**
+   * To commit the batch
+   * @param id 
+   * @param body 
+   * @returns 
+   */
+    @Post('commit')
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Commit batch' })
+    @ApiResponse({ status: 200, description: 'Batch committed successfully' })
+    commitBatch(
+      @Body() body: BatchCommitDto,
+      @Req() req: any,
+    ) {
+      return this.service.commitBatch( body,req.user);
+    }
 
   /**
    * Delete Batch (Soft Delete)
