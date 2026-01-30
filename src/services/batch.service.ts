@@ -160,7 +160,7 @@ export default class BatchService {
         bundle_name: bundleName,
       };
     } catch (error) {
-      console.log("========>", error);
+      console.log("BATCH COMMIT ERROR ->", error);
       await transaction.rollback();
       throw error;
     }

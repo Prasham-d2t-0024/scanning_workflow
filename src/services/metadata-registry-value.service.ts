@@ -269,7 +269,7 @@ export default class MetadataRegistryValueService {
         updatedCount: data.items.length,
       };
     } catch (error) {
-      console.log("=======",error);
+      console.log("METADATA REGISTERY UPDATE ERROR ->",error);
       await transaction.rollback();
       throw error;
     }
