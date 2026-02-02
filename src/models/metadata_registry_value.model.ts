@@ -1,5 +1,6 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import connection from '../config/dbconnection';
+import MetadataRegistry from './metadata_registry.model';
 
 /**
  * Attributes
@@ -37,7 +38,8 @@ class MetadataRegistryValue
   public metadata_registry_id!: number;
   public value!: string | number;
   public item_id!: number;
-
+  
+  public readonly metadataRegistry?: MetadataRegistry;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
   public readonly deletedAt!: Date;

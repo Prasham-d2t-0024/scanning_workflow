@@ -1,6 +1,8 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import connection from '../config/dbconnection';
 import Batch from './batch.model';
+import MetadataRegistryValue from './metadata_registry_value.model';
+import MetadataRegistry from './metadata_registry.model';
 
 export enum ItemStatus {
   NOT_COMMITED = -1,
@@ -40,7 +42,7 @@ class Item
   public item_status: ItemStatus;
 
   public batch?: Batch;
-
+  public readonly metadataValues?: MetadataRegistryValue[];
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
   public readonly deletedAt!: Date;

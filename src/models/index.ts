@@ -145,10 +145,12 @@ User.hasMany(DigitizationCenter, {
     as: 'metadataRegistry',
   });
 
-   MetadataRegistryValue.belongsTo(MetadataRegistry, {
-    foreignKey: 'metadata_registry_value_id',
+  MetadataRegistryValue.belongsTo(MetadataRegistry, {
+    foreignKey: 'metadata_registry_id',
+    targetKey: 'metadata_registry_id',
     as: 'metadataRegistry',
   });
+
 
 // =======================
 // Dropdown & DropdownOption Associations
@@ -222,6 +224,15 @@ User.hasMany(DigitizationCenter, {
     Batch.hasMany(Item, {
       foreignKey: 'batch_id',
       as: 'items',
+    });
+    Item.hasMany(MetadataRegistryValue, {
+      foreignKey: 'item_id',
+      as: 'metadataValues',
+    });
+
+    MetadataRegistryValue.belongsTo(Item, {
+      foreignKey: 'item_id',
+      as: 'item',
     });
 
 

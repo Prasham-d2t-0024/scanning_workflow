@@ -256,11 +256,7 @@ export default class MetadataRegistryValueService {
             },
           )
         )
-      ).then((resp)=>{
-        console.log("3333333333",resp);
-      }).catch((err)=>{
-        console.log("7777777777",err);
-      })
+      )
 
       await transaction.commit();
 

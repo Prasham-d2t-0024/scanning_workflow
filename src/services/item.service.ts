@@ -3,6 +3,8 @@ import Item, { ItemStatus } from '../models/item.model';
 import { ItemCreateDto, ItemUpdateDto } from '../dto/item.dto';
 import Batch from 'src/models/batch.model';
 import { Transaction } from 'sequelize';
+import { MetadataRegistry } from 'src/models';
+import MetadataRegistryValue from 'src/models/metadata_registry_value.model';
 
 @Injectable()
 export default class ItemService {
@@ -75,7 +77,62 @@ export default class ItemService {
   /**
    * Get all uncommitted items for a user
    */
- async findUserUncommittedItems(userId: number) {
+//  async findUserUncommittedItems(userId: number) {
+//     const rows = await Item.findAll({
+//       where: {
+//         item_status: ItemStatus.NOT_COMMITED,
+//       },
+//       include: [
+//         {
+//           model: MetadataRegistry,
+//           as: 'metadataRegistry',
+//         },
+//         {
+//           model: Batch,
+//           as: 'batch',
+//           required: true,
+//           where: {
+//             user_id: userId,
+//             is_commited: false,
+//           },
+//         },
+//       ],
+//       order: [['createdAt', 'DESC']],
+//     });
+
+//     if (!rows.length) {
+//       return {
+//         batch: null,
+//         items: [],
+//       };
+//     }
+
+//     // Batch info is same for all items → take from first row
+//     const { batch } = rows[0];
+
+//     // Extract only item-level fields
+//     const items = rows.map(item => ({
+//       item_id: item.item_id,
+//       name: item.name,
+//       item_status: item.item_status,
+//       createdAt: item.createdAt,
+//       updatedAt: item.updatedAt,
+//     }));
+
+//     return {
+//       batch: {
+//         batch_id: batch.batch_id,
+//         bundle_name: batch.bundle_name,
+//         batch_delivery_date: batch.batch_delivery_date,
+//         is_commited: batch.is_commited,
+//         user_id: batch.user_id,
+//         createdAt: batch.createdAt,
+//         updatedAt: batch.updatedAt,
+//       },
+//       items,
+//     };
+//   }
+  async findUserUncommittedItems(userId: number) {
     const rows = await Item.findAll({
       where: {
         item_status: ItemStatus.NOT_COMMITED,
@@ -90,6 +147,18 @@ export default class ItemService {
             is_commited: false,
           },
         },
+        {
+          model: MetadataRegistryValue,
+          as: 'metadataValues',
+          required: false,
+          include: [
+            {
+              model: MetadataRegistry,
+              as: 'metadataRegistry',
+              attributes: ['key', 'title', 'ismultiple'],
+            },
+          ],
+        },
       ],
       order: [['createdAt', 'DESC']],
     });
@@ -101,17 +170,33 @@ export default class ItemService {
       };
     }
 
-    // Batch info is same for all items → take from first row
     const { batch } = rows[0];
 
-    // Extract only item-level fields
-    const items = rows.map(item => ({
-      item_id: item.item_id,
-      name: item.name,
-      item_status: item.item_status,
-      createdAt: item.createdAt,
-      updatedAt: item.updatedAt,
-    }));
+    const items = rows.map(item => {
+      const metadata: Record<string, any> = {};
+
+      item.metadataValues?.forEach(val => {
+        const key = val.metadataRegistry?.key;
+        if (!key) return;
+
+        if (metadata[key]) {
+          metadata[key] = Array.isArray(metadata[key])
+            ? [...metadata[key], val.value]
+            : [metadata[key], val.value];
+        } else {
+          metadata[key] = val.value;
+        }
+      });
+
+      return {
+        item_id: item.item_id,
+        name: item.name,
+        item_status: item.item_status,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        metadata,
+      };
+    });
 
     return {
       batch: {
@@ -126,7 +211,6 @@ export default class ItemService {
       items,
     };
   }
-
 
   /**
    * Get Item by ID
